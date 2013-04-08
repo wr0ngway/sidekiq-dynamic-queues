@@ -20,6 +20,7 @@ module Sidekiq
           super
         else
           queues = expanded_queues
+          queues = @strictly_ordered_queues ? queues : queues.shuffle
           queues << Sidekiq::Fetcher::TIMEOUT
         end
       end

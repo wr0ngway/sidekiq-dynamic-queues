@@ -121,6 +121,16 @@ describe "Dynamic Queues" do
       fetch.queues_cmd.should eq ["queue:foo", SFTO]
     end
 
+    it "randomizes when not strict ordering" do
+      fetch = Fetch.new(:queues => %w[*], :strict => false)
+      
+      3.times.any? { fetch.queues_cmd != fetch.queues_cmd }.should be_true
+        
+      %w[high_x foo high_y superhigh_z].all? do |q|
+        fetch.queues_cmd.include?("queue:{q}")
+      end
+    end
+    
   end
 
   context "redis backed queues" do
