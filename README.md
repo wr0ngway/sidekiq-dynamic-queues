@@ -12,46 +12,46 @@ If creating a gem of your own that uses sidekiq-dynamic-queues, you may have to 
 
 Configure by setting Sidekiq.options[:fetch] = Sidekiq::DynamicQueues::Fetch
 
-Start your workers with a QUEUE that can contain '\*' for zero-or more of any character, '!' to exclude the following pattern, or @key to look up the patterns from redis.  Some examples help:
+Start your workers with a queue that can contain '\*' (.star.) for zero-or more of any character, '!' (.not.) to exclude the following pattern, or @key (.at.key) to look up the patterns from redis.  The version in parens is required to get around the sidekiq cli's restriction on queue names.  Some examples help:
 
     sidekiq -q foo
 
 Pulls jobs from the queue 'foo'
 
-    sidekiq -q *
+    sidekiq -q .star.
 
 Pulls jobs from any queue
 
-    sidekiq -q *foo
+    sidekiq -q .star.foo
 
 Pulls jobs from queues that end in foo
 
-    sidekiq -q *foo*
+    sidekiq -q .star.foo.star.
 
 Pulls jobs from queues whose names contain foo
 
-    sidekiq -q *foo* -q !foobar
+    sidekiq -q .star.foo.star. -q .not.foobar
 
 Pulls jobs from queues whose names contain foo except the foobar queue
 
-    sidekiq -q *foo* -q !*bar
+    sidekiq -q .star.foo.star. -q .not..star.bar
 
 Pulls jobs from queues whose names contain foo except queues whose names end in bar
 
-    QUEUE='@key' sidekiq -q @key
+    sidekiq -q .at.key
 
 Pulls jobs from queue names stored in redis (use Sidekiq::DynamicQueues::Attributes.set\_dynamic\_queue("key", ["queuename1", "queuename2"]) to set them)
 
-    sidekiq -q * -q !@key
+    sidekiq -q .star. -q .not..at.key
 
 Pulls jobs from any queue except ones stored in redis
 
-    sidekiq -q @
+    sidekiq -q .at.
 
 Pulls jobs from queue names stored in redis using the hostname of the worker
 
     Sidekiq::DynamicQueues::Attributes.set_dynamic_queue("key", ["*foo*", "!*bar"])
-    sidekiq -q @key 
+    sidekiq -q .at.key 
 
 Pulls jobs from queue names stored in redis, with wildcards/negations
 
