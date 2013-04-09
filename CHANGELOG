@@ -1,3 +1,8 @@
+0.5.3
+-----
+
+uses default queue when wildcard expands empty <bf8fbb6> [Matt Conway]
+
 0.5.2
 -----
 
