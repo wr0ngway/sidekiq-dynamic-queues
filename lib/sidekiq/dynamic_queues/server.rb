@@ -58,7 +58,7 @@ module Sidekiq
             queues[key] = values
           end
           Attr.set_dynamic_queues(queues)
-          redirect "/dynamicqueue"
+          redirect "#{root_path}dynamicqueue"
         end
 
         app.tabs["DynamicQueues"] = "dynamicqueue"
