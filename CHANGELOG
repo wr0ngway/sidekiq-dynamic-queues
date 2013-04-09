@@ -1,3 +1,9 @@
+0.5.2
+-----
+
+allow mounting web app in sub-path <8614064> [Matt Conway]
+update readme for cli workaround <cdb7571> [Matt Conway]
+
 0.5.1
 -----
 
