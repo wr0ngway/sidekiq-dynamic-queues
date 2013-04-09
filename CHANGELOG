@@ -1,3 +1,9 @@
+0.5.1
+-----
+
+use jruby for dev <bc793df> [Matt Conway]
+hack to translate queues from sidekiq cli since it doesn't allow special characters <ba7b99a> [Matt Conway]
+
 0.5.0
 -----
 
