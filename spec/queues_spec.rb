@@ -3,6 +3,7 @@ require "spec_helper"
 describe "Dynamic Queues" do
 
   include Sidekiq::DynamicQueues::Attributes
+  Fetch = Sidekiq::DynamicQueues::Fetch
   
   def watch_queues(*queues)
     Sidekiq.redis do |r|
@@ -14,28 +15,6 @@ describe "Dynamic Queues" do
     SomeJob.sidekiq_options('retry' => false, 'queue' => 'default')
     SomeJob.result = nil
     Sidekiq.redis {|r| r.flushall }
-  end
-
-  context "basic behavior still works" do
-
-    it "can work on different queues" do
-      SomeJob.perform_async(1)
-      run_queues("default")
-      SomeJob.result.should eq [1] 
-      enqueue_on("other", SomeJob, 2)
-      run_queues("other")
-      SomeJob.result.should eq [2] 
-    end
-
-    it "can work on multiple queues" do
-      SomeJob.perform_async(1)
-      run_queues("other", "default")
-      SomeJob.result.should eq [1] 
-      enqueue_on("other", SomeJob, 2)
-      run_queues("default", "other")
-      SomeJob.result.should eq [2] 
-    end
-
   end
 
   context "attributes" do
@@ -72,12 +51,42 @@ describe "Dynamic Queues" do
       get_dynamic_queues.should == {'default' => ['*']}
     end
     
+  end
+  
+  context "#translate_from_cli" do
+    
+    it "passes through reqular queue name" do
+      translated = Fetch.translate_from_cli("foo", "baz.bar", "bo_o", "bu-m")
+      translated.should eq ["foo", "baz.bar", "bo_o", "bu-m"] 
+    end
+    
+    it "translates *" do
+      translated = Fetch.translate_from_cli(".star.", ".star.foo",
+                                            "foo.star.", "f.star.o")
+      translated.should eq ["*", "*foo", "foo*", "f*o"] 
+    end
+    
+    it "translates !" do
+      translated = Fetch.translate_from_cli(".not.", ".not.foo",
+                                            "foo.not.", "f.not.o")
+      translated.should eq ["!", "!foo", "foo!", "f!o"] 
+    end
+    
+    it "translates @" do
+      translated = Fetch.translate_from_cli(".at.", ".at.foo",
+                                            "foo.at.", "f.at.o")
+      translated.should eq ["@", "@foo", "foo@", "f@o"] 
+    end
+    
+    it "translates multiple" do
+      translated = Fetch.translate_from_cli(".not..star.", ".not..at.foo")
+      translated.should eq ["!*", "!@foo"] 
+    end
     
   end
   
   context "basic queue patterns" do
 
-    Fetch = Sidekiq::DynamicQueues::Fetch
     SFTO = Sidekiq::Fetcher::TIMEOUT
     
     before(:each) do
@@ -195,4 +204,44 @@ describe "Dynamic Queues" do
 
   end
 
+  context "integration" do
+    before(:all) do
+      Sidekiq.options[:fetch] = Sidekiq::DynamicQueues::Fetch
+      Sidekiq.options[:queue_refresh_timeout] = 0.01
+    end
+    
+    it "does use the correct fetch strategy" do
+      Sidekiq::Fetcher.strategy.should eq Sidekiq::DynamicQueues::Fetch
+    end
+
+    it "can work on different queues" do
+      SomeJob.perform_async(1)
+      run_queues("default")
+      SomeJob.result.should eq [1] 
+      enqueue_on("other", SomeJob, 2)
+      run_queues("other")
+      SomeJob.result.should eq [2]
+      
+    end
+
+    it "can work on multiple queues" do
+      SomeJob.perform_async(1)
+      run_queues("other", "default")
+      SomeJob.result.should eq [1] 
+      enqueue_on("other", SomeJob, 2)
+      run_queues("default", "other")
+      SomeJob.result.should eq [2] 
+    end
+
+    it "finds work on dynamic queue that doesn't exist till after" do
+      watch_queues(*%w[default])
+      manager = run_queues("*", :async => true)
+      sleep 0.2
+      enqueue_on("other", SomeJob, 1)
+      manager.wait(:shutdown)
+      SomeJob.result.should eq [1] 
+    end
+
+  end
+  
 end

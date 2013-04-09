@@ -70,15 +70,24 @@ def enqueue_on(queue, job_class, *job_args)
 end
 
 def run_queues(*queues)
+  options = queues.last.is_a?(Hash) ? queues.pop : {}
+  options = {:async => false, :job_count => 1}.merge(options)
+  
   Sidekiq::Fetcher.instance_eval { @done = false }
   manager = Sidekiq::Manager.new({:queues=>queues, :concurrency=>1, :timeout=>1})
 
+  job_count = 0
   manager.when_done do
-    manager.async.stop(:shutdown => true, :timeout => 0)
+    job_count += 1
+    yield if block_given?
+    if job_count >= options[:job_count].to_i
+      manager.stop(:shutdown => true, :timeout => 0)
+    end
   end
-  manager.async.start
+  manager.start
   
-  manager.wait(:shutdown)
+  manager.wait(:shutdown) unless options[:async]
+  manager
 end
 
 

@@ -11,7 +11,7 @@ module Sidekiq
       
       def initialize(options)
         super
-        @dynamic_queues = options[:queues]
+        @dynamic_queues = self.class.translate_from_cli(*options[:queues])
       end
   
       # overriding Sidekiq::BasicFetch#queues_cmd
@@ -76,6 +76,13 @@ module Sidekiq
         end
 
         return matched_queues.collect { |q| "queue:#{q}" }.uniq.sort
+      end
+
+      
+      def self.translate_from_cli(*queues)
+        queues.collect do |queue|
+          queue.gsub('.star.', '*').gsub('.at.', '@').gsub('.not.', '!')
+        end
       end
       
     end
