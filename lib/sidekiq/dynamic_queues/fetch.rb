@@ -21,6 +21,7 @@ module Sidekiq
         else
           queues = expanded_queues
           queues = @strictly_ordered_queues ? queues : queues.shuffle
+          queues << "queue:default" if queues.size == 0
           queues << Sidekiq::Fetcher::TIMEOUT
         end
       end

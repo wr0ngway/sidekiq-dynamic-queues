@@ -8,7 +8,8 @@ describe "Dynamic Queues" do
   def watch_queues(*queues)
     Sidekiq.redis do |r|
       queues.each {|q| r.sadd('queues', q) }
-    end    
+      r.del('queues') if queues.size == 0
+    end
   end
   
   before(:each) do
@@ -91,6 +92,12 @@ describe "Dynamic Queues" do
     
     before(:each) do
       watch_queues(*%w[high_x foo high_y superhigh_z])
+    end
+    
+    it "uses default when wildcard empty" do
+      watch_queues()
+      fetch = Fetch.new(:queues => %w[*], :strict => true)
+      fetch.queues_cmd.should eq ["queue:default", SFTO]
     end
 
     it "can specify simple queues" do
