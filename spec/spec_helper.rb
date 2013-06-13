@@ -1,5 +1,13 @@
 require 'rspec'
 require 'sidekiq-dynamic-queues'
+require 'celluloid'
+require 'sidekiq'
+require 'sidekiq/fetch'
+require 'sidekiq/cli'
+require 'sidekiq/manager'
+
+Sidekiq.logger.level = Logger::DEBUG
+Celluloid.logger = Sidekiq.logger = nil
 
 # No need to start redis when running in Travis
 unless ENV['CI']
@@ -45,11 +53,6 @@ def dump_redis
   return result
 end
 
-require 'celluloid'
-require 'sidekiq'
-require 'sidekiq/fetch'
-require 'sidekiq/cli'
-require 'sidekiq/manager'
 
 Sidekiq.configure_client do |config|
   config.redis = { :namespace => 'sidekiq',
@@ -62,9 +65,6 @@ Sidekiq.configure_server do |config|
                    :url => 'redis://localhost:6379/1' }
 end
 
-Celluloid.logger = nil
-Sidekiq.logger = nil
-#Celluloid.logger = Sidekiq.logger
 
 def enqueue_on(queue, job_class, *job_args)
   job_class.client_push('class' => job_class, 'args' => job_args, 'queue' => queue)
@@ -72,25 +72,25 @@ end
 
 def run_queues(*queues)
   options = queues.last.is_a?(Hash) ? queues.pop : {}
-  options = {:async => false, :job_count => 1}.merge(options)
-  
+  options = {:async => false, :timeout => 5}.merge(options)
   Sidekiq::Fetcher.instance_eval { @done = false }
   manager = Sidekiq::Manager.new({:queues=>queues, :concurrency=>1, :timeout=>1})
 
-  job_count = 0
-  manager.when_done do
-    job_count += 1
-    yield if block_given?
-    if job_count >= options[:job_count].to_i
-      manager.stop(:shutdown => true, :timeout => 0)
-    end
-  end
   manager.start
   
-  manager.wait(:shutdown) unless options[:async]
+  unless options[:async]
+    # give up control so jobs can start running before we call stop
+    # Manager.when_done only gets called for jobs that succeed, not jobs that raise
+    sleep 0.1
+    manager.async.stop(:shutdown => true, :timeout => 1)
+
+    timeout(options[:timeout]) do
+      manager.wait(:shutdown)
+    end
+  end
+  
   manager
 end
-
 
 class SomeJob
   include Sidekiq::Worker

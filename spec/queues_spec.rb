@@ -240,12 +240,21 @@ describe "Dynamic Queues" do
       SomeJob.result.should eq [2] 
     end
 
-    it "finds work on dynamic queue that doesn't exist till after" do
+    it "finds work on dynamic queue that doesn't exist till after sidekiq is waiting for jobs" do
       watch_queues(*%w[default])
       manager = run_queues("*", :async => true)
-      sleep 0.2
+      # give run_queues a chance to block on only the default queue given above
+      sleep 0.1 
+      
       enqueue_on("other", SomeJob, 1)
-      manager.wait(:shutdown)
+      
+      # sidekiq brpop's with a timeout of 1, so we need to wait longer than
+      # that for it to re-evaluate the dynamic queues
+      sleep 2
+      timeout(5) do
+        manager.async.stop(:shutdown => true, :timeout => 1)
+        manager.wait(:shutdown)
+      end
       SomeJob.result.should eq [1] 
     end
 
