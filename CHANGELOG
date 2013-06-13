@@ -1,3 +1,9 @@
+0.5.5 (06/13/2013)
+------------------
+
+fix celluloid dependency bug <280892e> [Michael Wu]
+fix integration tests <c715333> [Matt Conway]
+
 0.5.4
 -----
 
