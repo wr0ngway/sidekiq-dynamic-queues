@@ -10,8 +10,12 @@ If creating a gem of your own that uses sidekiq-dynamic-queues, you may have to 
 
     require 'sidekiq-dynamic-queues'
 
-Configure by setting Sidekiq.options[:fetch] = Sidekiq::DynamicQueues::Fetch
-
+Configure by:
+ 
+    Sidekiq.configure_server do |config|
+        config.options[:fetch] = Sidekiq::DynamicQueues::Fetch
+    end
+    
 Start your workers with a queue that can contain '\*' (.star.) for zero-or more of any character, '!' (.not.) to exclude the following pattern, or @key (.at.key) to look up the patterns from redis.  The version in parens is required to get around the sidekiq cli's restriction on queue names.  Some examples help:
 
     sidekiq -q foo

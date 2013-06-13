@@ -22,9 +22,7 @@ module Sidekiq
           @queues = []
           dqueues = Attr.get_dynamic_queues
           dqueues.each do |k, v|
-            fetch = Fetch.new(:queues => ["@#{k}"], :strict => true)
-            expanded = fetch.queues_cmd
-            expanded.pop
+            expanded = Attr.expand_queues(["@#{k}"])
             expanded = expanded.collect {|q| q.split(":").last }
             view_data = {
                 'name' => k,
