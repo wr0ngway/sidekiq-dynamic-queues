@@ -1,4 +1,4 @@
-require 'sidekiq/fetch'
+require 'forwardable'
 
 module Sidekiq
   module DynamicQueues

@@ -45,8 +45,9 @@ def dump_redis
   return result
 end
 
-require 'sidekiq'
 require 'celluloid'
+require 'sidekiq'
+require 'sidekiq/fetch'
 require 'sidekiq/cli'
 require 'sidekiq/manager'
 
