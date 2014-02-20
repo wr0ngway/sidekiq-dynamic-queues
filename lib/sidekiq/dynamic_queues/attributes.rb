@@ -10,12 +10,12 @@ module Sidekiq
       def json_encode(data)
         Sidekiq.dump_json(data)
       end
-      
+
       def json_decode(data)
         return nil unless data
         Sidekiq.load_json(data)
       end
-      
+
       def get_dynamic_queue(key, fallback=['*'])
         data = Sidekiq.redis {|r| r.hget(DYNAMIC_QUEUE_KEY, key) }
         queue_names = json_decode(data)
@@ -24,7 +24,7 @@ module Sidekiq
           data = Sidekiq.redis {|r| r.hget(DYNAMIC_QUEUE_KEY, FALLBACK_KEY) }
           queue_names = json_decode(data)
         end
-        
+
         if queue_names.nil? || queue_names.size == 0
           queue_names = fallback
         end
@@ -39,7 +39,7 @@ module Sidekiq
           Sidekiq.redis {|r| r.hset(DYNAMIC_QUEUE_KEY, key, json_encode(values)) }
         end
       end
-      
+
       def set_dynamic_queues(dynamic_queues)
         Sidekiq.redis do |r|
           r.multi do
@@ -58,7 +58,7 @@ module Sidekiq
         result[FALLBACK_KEY] ||= ['*']
         return result
       end
-      
+
       # Returns a list of queues to use when searching for a job.
       #
       # A splat ("*") means you want every queue (in alpha order) - this
@@ -76,7 +76,7 @@ module Sidekiq
       def expand_queues(queues)
         queue_names = queues.dup
 
-        real_queues = Sidekiq::Client.registered_queues
+        real_queues = Sidekiq::Queue.all.map(&:name)
         matched_queues = []
 
         while q = queue_names.shift
@@ -113,6 +113,6 @@ module Sidekiq
       end
 
     end
-    
+
   end
 end
