@@ -1,3 +1,10 @@
+0.6.0 (03/04/2014)
+------------------
+
+Merge pull request #3 from adstage-david/master <c1f77c5> [Matt Conway]
+Use Sidekiq::Queue.all instead of deprecated registered_queues. <e01c6b0> [David Haslem]
+updated for latest sidekiq: slim -> erb, fix running of jobs in tests <eb7f982> [Matt Conway]
+
 0.5.6 (06/13/2013)
 ------------------
 
