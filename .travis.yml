@@ -1,6 +1,18 @@
 language: ruby
+
+services:
+  - redis-server
+
 rvm:
   - 1.9.3
+  - 2.1.1
   - jruby-19mode # JRuby in 1.9 mode
-  # - rbx-19mode
+  - rbx
+
 script: bundle exec rspec spec
+
+matrix:
+  allow_failures:
+    - rvm: rbx
+
+
