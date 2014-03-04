@@ -44,7 +44,7 @@ module Sidekiq
             end
           end
           
-          slim :dynamicqueue
+          erb :dynamicqueue
         end
 
         app.post "/dynamicqueue" do

@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('sinatra')
   s.add_development_dependency('slim')
   s.add_development_dependency('rack-test', '~> 0.5.4')
+  s.add_development_dependency('tilt', '~> 1.4')
 
 end
 

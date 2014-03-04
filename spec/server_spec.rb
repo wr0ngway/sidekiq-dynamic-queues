@@ -94,10 +94,10 @@ describe "Dynamic Queues pages" do
       set_dynamic_queue("key_two", ["bar", "baz"])
       get "/dynamicqueue"
 
-      last_response.body.should match /<input id="input-0-name" name="queues\[\]\[name\]" type="text" value="key_one"/
-      last_response.body.should match /<input id="input-0-value" name="queues\[\]\[value\]" type="text" value="foo"/
-      last_response.body.should match /<input id="input-1-name" name="queues\[\]\[name\]" type="text" value="key_two"/
-      last_response.body.should match /<input id="input-1-value" name="queues\[\]\[value\]" type="text" value="bar, baz"/
+      last_response.body.should include '<input type="text" id="input-0-name" name="queues[][name]" value="key_one" />'
+      last_response.body.should include '<input type="text" id="input-0-value" name="queues[][value]" value="foo" />'
+      last_response.body.should include '<input type="text" id="input-1-name" name="queues[][name]" value="key_two" />'
+      last_response.body.should include '<input type="text" id="input-1-value" name="queues[][value]" value="bar, baz" />'
     end
 
     it "should delete queues on empty queue submit" do
