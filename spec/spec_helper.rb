@@ -51,16 +51,19 @@ def dump_redis
   return result
 end
 
+redis_config = {
+  :namespace => 'sidekiq',
+  :size => 10,
+  :url => 'redis://localhost:6379/1',
+  :pool_timeout => 10
+}
 
 Sidekiq.configure_client do |config|
-  config.redis = { :namespace => 'sidekiq',
-                   :size => 1,
-                   :url => 'redis://localhost:6379/1' }
+  config.redis = redis_config
 end
 
 Sidekiq.configure_server do |config|
-  config.redis = { :namespace => 'sidekiq',
-                   :url => 'redis://localhost:6379/1' }
+  config.redis = redis_config
 end
 
 
