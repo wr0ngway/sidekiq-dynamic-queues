@@ -72,7 +72,7 @@ def run_queues(*queues)
   options = queues.last.is_a?(Hash) ? queues.pop : {}
   options = {:async => false, :timeout => 5}.merge(options)
 
-  sidekiq_opts = {:queues=>queues, :concurrency=>1, :timeout=>1}
+  sidekiq_opts = {:queues=>queues, :concurrency=>1, :timeout=>10}
   Sidekiq::Fetcher.reset
   launcher = Sidekiq::Launcher.new(sidekiq_opts)
   launcher.run
