@@ -105,11 +105,11 @@ module Sidekiq
           else
             matches = real_queues.grep(/^#{pattern}$/)
             matches = [q] if matches.size == 0 && q == patstr
-            matched_queues.concat(matches)
+            matched_queues.concat(matches.sort)
           end
         end
 
-        return matched_queues.collect { |q| "queue:#{q}" }.uniq.sort
+        return matched_queues.collect { |q| "queue:#{q}" }.uniq
       end
 
     end
