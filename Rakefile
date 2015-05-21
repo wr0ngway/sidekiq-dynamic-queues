@@ -16,7 +16,7 @@ task :changelog do
   tags = `git tag -l`.split
   tags = tags.sort_by {|t| t[1..-1].split(".").collect {|s| s.to_i } }
   newest_tag = tags[-1]
-  
+
   if version == newest_tag
     puts "You need to update version, same as most recent tag: #{version}"
     exit
@@ -62,6 +62,6 @@ task :changelog do
   end
 
   # Commit and push
-  sh "git ci -m'Updated changelog' #{changelog_file}"
+  sh "git commit -m'Updated changelog' #{changelog_file}"
   sh "git push"
 end
