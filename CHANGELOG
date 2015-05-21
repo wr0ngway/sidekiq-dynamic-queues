@@ -1,3 +1,15 @@
+1.0.0
+-----
+
+Update release rake <fc396b2> [David Haslem]
+Bump version to 0.7.0 <fa9633d> [David Haslem]
+Merge pull request #6 from sbounmy/sidekiq-3 <e005321> [David Haslem]
+bump sidekiq dependency 3 <1c58c1d> [Stephane Bounmy]
+bigger pool and redis timeouts for travis <9eb8c56> [Matt Conway]
+show full backtrace for travis <208a48f> [Matt Conway]
+try a diff tineout for travis <c1c7bd6> [Matt Conway]
+update travis <44562d7> [Matt Conway]
+
 0.6.0 (03/04/2014)
 ------------------
 
