@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency("sidekiq", '~> 3')
+  s.add_dependency("sidekiq", ">= 3", "< 5")
 
   s.add_development_dependency('rake')
   s.add_development_dependency('rspec', '~> 2.5')
@@ -27,6 +27,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency('slim')
   s.add_development_dependency('rack-test', '~> 0.5.4')
   s.add_development_dependency('tilt', '~> 1.4')
+  s.add_development_dependency('tilt', '~> 1.4')
+  s.add_development_dependency('celluloid', '~> 0.17.2')
 
 end
 
