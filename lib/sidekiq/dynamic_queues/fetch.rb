@@ -26,6 +26,7 @@ module Sidekiq
           queues = expand_queues(@dynamic_queues)
           queues = @strictly_ordered_queues ? queues : queues.shuffle
           queues << "queue:default" if queues.size == 0
+          queues = queues.shuffle.uniq
           queues << get_timeout
         end
       end
