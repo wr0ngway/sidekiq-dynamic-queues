@@ -84,7 +84,7 @@ module Sidekiq
 
           if q =~ /^(!)?@(.*)/
             key = $2.strip
-            key = hostname if key.size == 0
+            key = (ENV['DYNO'] || Socket.gethostname) if key.size == 0
 
             add_queues = get_dynamic_queue(key)
             add_queues.map! { |q| q.gsub!(/^!/, '') || q.gsub!(/^/, '!') } if $1

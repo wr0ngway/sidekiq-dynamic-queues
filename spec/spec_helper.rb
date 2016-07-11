@@ -7,6 +7,10 @@ require 'sidekiq/launcher'
 Sidekiq.logger.level = Logger::DEBUG
 Celluloid.logger = Sidekiq.logger = nil
 
+RSpec.configure do |config|
+  config.raise_errors_for_deprecations!
+end
+
 # No need to start redis when running in Travis
 unless ENV['CI']
 
@@ -15,10 +19,10 @@ unless ENV['CI']
   rescue Errno::ECONNREFUSED
     spec_dir = File.dirname(File.expand_path(__FILE__))
     REDIS_CMD = "redis-server #{spec_dir}/redis-test.conf"
-    
+
     puts "Starting redis for testing at localhost..."
     puts `cd #{spec_dir}; #{REDIS_CMD}`
-    
+
     # Schedule the redis server for shutdown when tests are all finished.
     at_exit do
       puts 'Stopping redis'
@@ -29,7 +33,6 @@ unless ENV['CI']
       File.delete("#{spec_dir}/dump.rdb") rescue nil
     end
   end
-  
 end
 
 def dump_redis
@@ -55,7 +58,7 @@ redis_config = {
   :namespace => 'sidekiq',
   :size => 10,
   :url => 'redis://localhost:6379/1',
-  :pool_timeout => 10
+  :pool_timeout => 1
 }
 
 Sidekiq.configure_client do |config|
@@ -66,17 +69,15 @@ Sidekiq.configure_server do |config|
   config.redis = redis_config
 end
 
-
 def enqueue_on(queue, job_class, *job_args)
   job_class.client_push('class' => job_class, 'args' => job_args, 'queue' => queue)
 end
 
 def run_queues(*queues)
   options = queues.last.is_a?(Hash) ? queues.pop : {}
-  options = {:async => false, :timeout => 5}.merge(options)
+  options = {:async => false, :timeout => 1}.merge(options)
 
-  sidekiq_opts = {:queues=>queues, :concurrency=>1, :timeout=>10}
-  Sidekiq::Fetcher.reset
+  sidekiq_opts = {:queues=>queues, :concurrency=>1, :timeout=>1}
   launcher = Sidekiq::Launcher.new(sidekiq_opts)
   launcher.run
 
@@ -86,15 +87,15 @@ def run_queues(*queues)
     sleep 0.1
     launcher.stop
   end
-  
+
   launcher
 end
 
 class SomeJob
   include Sidekiq::Worker
-  
+
   class_attribute :result
-  
+
   def perform(*args)
     self.class.result = args
   end

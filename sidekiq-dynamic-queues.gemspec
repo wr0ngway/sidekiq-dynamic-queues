@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency("sidekiq", '>= 3')
 
   s.add_development_dependency('rake')
+  s.add_development_dependency('celluloid')
   s.add_development_dependency('rspec', '~> 2.5')
   s.add_development_dependency('sinatra')
   s.add_development_dependency('slim')
